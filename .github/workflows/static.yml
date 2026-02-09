@@ -20,7 +20,7 @@ jobs:
       # 2. Set up Flutter
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: stable
+          channel: stable
 
       # 3. Inject API key
       - name: Inject API Key
