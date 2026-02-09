@@ -2,8 +2,8 @@ import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MqttService {
-  final String broker = '6535208d4a14400a9420663cfc862c9c.s1.eu.hivemq.cloud';
-  final int port = 8883;
+  final String broker = 'wss://6535208d4a14400a9420663cfc862c9c.s1.eu.hivemq.cloud:8884/mqtt';
+  final int port = 8884;
   final String username = 'parry';
   final String password = 'Greenblue2007';
   final String clientId = 'flutterClient';
@@ -12,7 +12,15 @@ class MqttService {
 
   Future<void> ring() async {
     await connect();
-    publish("ALARM");
+
+    if (client.connectionStatus!.state == MqttConnectionState.connected) {
+      print('Connected to HiveMQ');
+      
+      publish("ALARM");
+    } else {
+      print('Connection failed - status: ${client.connectionStatus!.state}');
+      client.disconnect();
+    }
   }
 
   Future<void> connect() async {
@@ -41,6 +49,7 @@ class MqttService {
 
   void onDisconnected() {
     print('Disconnected from HiveMQ');
+    connect();
   }
 
   void publish(String message) {
