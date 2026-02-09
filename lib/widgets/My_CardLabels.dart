@@ -3,6 +3,7 @@ import 'package:flutterfirsttest/widgets/Confirm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterfirsttest/widgets/themeColor.dart';
 import 'package:flutterfirsttest/db/DataBaseHelper.dart';
+import 'package:flutterfirsttest/networking/mqtt.dart';
 import 'dart:async';
 
 class My_CardLabels extends StatefulWidget {
@@ -27,6 +28,7 @@ class _My_CardLabelsState extends State<My_CardLabels> {
   Confirm c = Confirm();
   bool confirm = true;
   bool light = true;
+  final MqttService mqttService = MqttService();
 
   static List<int> DayToInt(String days) {
     List<int> DaysInInt = [];
@@ -64,6 +66,7 @@ class _My_CardLabelsState extends State<My_CardLabels> {
             widget.label!.DateAndTimes.minute == DateTime.now().minute &&
             widget.label!.DateAndTimes.second == DateTime.now().second) {
           print("The alarm notice over http worked!");
+          mqttService.ring();
         }
       });
       print(
