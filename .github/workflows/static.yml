@@ -24,7 +24,9 @@ jobs:
 
       # 3. Inject API key
       - name: Inject API Key
-        run: echo "const String HUGGINGFACE_API_KEY = '${{ secrets.HUGGINGFACE_API_KEY }}';" > lib/api_key.dart
+        run: |
+          mkdir -p lib
+          echo "const String HUGGINGFACE_API_KEY = '${{ secrets.HUGGINGFACE_API_KEY }}';" > lib/api_key.dart
 
       # 4. Get dependencies
       - name: Flutter pub get
