@@ -27,7 +27,7 @@ jobs:
           echo "const String HUGGINGFACE_API_KEY = '${{ secrets.HUGGINGFACE_API_KEY }}';" > lib/api_key.dart
 
       - name: Build Flutter Web
-        run: flutter build web --base-href="/your-repo-name/"
+        run: flutter build web --base-href="/Medi/"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
