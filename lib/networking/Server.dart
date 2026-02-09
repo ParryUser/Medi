@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:flutterfirsttest/widgets/themeColor.dart';
-import 'package:flutterfirsttest/api_key.dart';
 
 class ChatMessage {
   final String role;
@@ -17,10 +16,8 @@ class ChatMessage {
 
 class Server {
   final Uri baseUrl = Uri.parse(
-    'https://router.huggingface.co/v1/chat/completions',
+    'https://hf-proxy.parrytube.workers.dev',
   );
-
-  final String apiKey = HUGGINGFACE_API_KEY;
 
   Future<String> askWithHistory(List<ChatMessage> history) async {
     final messages = _buildMessages(history);
@@ -28,7 +25,6 @@ class Server {
     final response = await http.post(
       baseUrl,
       headers: {
-        'Authorization': 'Bearer $apiKey',
         'Content-Type': 'application/json',
       },
       body: convert.jsonEncode({
