@@ -330,6 +330,7 @@ class _My_CardLabelsState extends State<My_CardLabels> {
                         padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
                         child: Row(
                           children: [
+                            // Debug: Show MQTT button (uncomment to test)
                             // Test MQTT button
                             /*IconButton(
                               icon: Icon(Icons.send, size: 20),
