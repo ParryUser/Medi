@@ -28,7 +28,7 @@ class _My_CardLabelsState extends State<My_CardLabels> {
   Confirm c = Confirm();
   bool confirm = true;
   bool light = true;
-  final MqttService mqttService = MqttService();
+  final MqttService newclient = MqttService();
 
   static List<int> DayToInt(String days) {
     List<int> DaysInInt = [];
@@ -59,14 +59,18 @@ class _My_CardLabelsState extends State<My_CardLabels> {
     } else if (widget.label != null) {
       createLabelInDb();
       timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
+        // Debug: Check if timer is running (uncomment to see)
+        // print('⏰ Timer check: ${DateTime.now().hour}:${DateTime.now().minute}:${DateTime.now().second}');
+
         if (_My_CardLabelsState.DayToInt(
               widget.label!.days,
             ).contains(DateTime.now().weekday) &&
             widget.label!.DateAndTimes.hour == DateTime.now().hour &&
             widget.label!.DateAndTimes.minute == DateTime.now().minute &&
             widget.label!.DateAndTimes.second == DateTime.now().second) {
-          print("The alarm notice over http worked!");
-          mqttService.ring();
+          print("🚨 The alarm notice over http worked!");
+          print("📞 Calling mqttService.ring()...");
+          newclient.ring();
         }
       });
       print(
@@ -324,27 +328,42 @@ class _My_CardLabelsState extends State<My_CardLabels> {
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                        child: Switch(
-                          mouseCursor: SystemMouseCursors.click,
-                          padding: EdgeInsets.all(5),
-                          value: light,
-                          activeThumbColor: HSLColor.fromAHSL(
-                            1.0,
-                            221.21,
-                            0.83,
-                            0.53,
-                          ).toColor(),
-                          inactiveThumbColor: const Color.fromARGB(
-                            255,
-                            35,
-                            41,
-                            43,
-                          ),
-                          onChanged: (bool value) {
-                            setState(() {
-                              light = value;
-                            });
-                          },
+                        child: Row(
+                          children: [
+                            // Test MQTT button
+                            /*IconButton(
+                              icon: Icon(Icons.send, size: 20),
+                              tooltip: 'Test MQTT Connection',
+                              onPressed: () {
+                                print(
+                                  '🧪 Test button pressed - triggering MQTT...',
+                                );
+                                newclient.ring();
+                              },
+                            ),*/
+                            Switch(
+                              mouseCursor: SystemMouseCursors.click,
+                              padding: EdgeInsets.all(5),
+                              value: light,
+                              activeThumbColor: HSLColor.fromAHSL(
+                                1.0,
+                                221.21,
+                                0.83,
+                                0.53,
+                              ).toColor(),
+                              inactiveThumbColor: const Color.fromARGB(
+                                255,
+                                35,
+                                41,
+                                43,
+                              ),
+                              onChanged: (bool value) {
+                                setState(() {
+                                  light = value;
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ),
                     ],

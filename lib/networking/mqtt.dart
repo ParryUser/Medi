@@ -1,69 +1,74 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MqttService {
-  final String broker = 'wss://6535208d4a14400a9420663cfc862c9c.s1.eu.hivemq.cloud:8884/mqtt';
-  final int port = 8884;
+  final String host = '6535208d4a14400a9420663cfc862c9c.s1.eu.hivemq.cloud';
+
+  final int wsPort = 8884;
+  final int tlsPort = 8883;
+
   final String username = 'parry';
   final String password = 'Greenblue2007';
-  final String clientId = 'flutterClient';
 
-  late MqttServerClient client;
+  final String topic = 'esp32/controller';
+
+  late MqttClient client;
 
   Future<void> ring() async {
-    await connect();
+    final clientId = 'flutter_${DateTime.now().millisecondsSinceEpoch}';
 
-    if (client.connectionStatus!.state == MqttConnectionState.connected) {
-      print('Connected to HiveMQ');
-      
-      publish("ALARM");
+    if (kIsWeb) {
+      final browserClient = MqttBrowserClient(
+        'wss://$host:$wsPort/mqtt',
+        clientId,
+      );
+
+      browserClient.port = wsPort;
+
+      browserClient.websocketProtocols = ['mqtt'];
+
+      client = browserClient;
     } else {
-      print('Connection failed - status: ${client.connectionStatus!.state}');
-      client.disconnect();
+      final serverClient = MqttServerClient(host, clientId);
+      serverClient.port = tlsPort;
+      serverClient.secure = true;
+      client = serverClient;
     }
-  }
 
-  Future<void> connect() async {
-    client = MqttServerClient(broker, clientId);
-    client.port = port;
-    client.secure = true;
-    client.logging(on: true);
+    client.setProtocolV311();
+
     client.keepAlivePeriod = 20;
-    client.onDisconnected = onDisconnected;
+    client.logging(on: true);
 
-    final connMessage = MqttConnectMessage()
+    client.connectionMessage = MqttConnectMessage()
         .withClientIdentifier(clientId)
         .startClean()
-        .authenticateAs(username, password)
-        .withWillQos(MqttQos.atLeastOnce);
-    client.connectionMessage = connMessage;
+        .authenticateAs(username, password);
 
     try {
       await client.connect();
-      print('Connected to HiveMQ!');
     } catch (e) {
-      print('Connection failed: $e');
+      print('❌ MQTT connection error: $e');
       client.disconnect();
+      return;
     }
-  }
 
-  void onDisconnected() {
-    print('Disconnected from HiveMQ');
-    connect();
-  }
+    if (client.connectionStatus?.state != MqttConnectionState.connected) {
+      print('❌ MQTT not connected');
+      client.disconnect();
+      return;
+    }
 
-  void publish(String message) {
     final builder = MqttClientPayloadBuilder();
-    builder.addString(message);
-    client.publishMessage(
-      'esp32/controller',
-      MqttQos.atLeastOnce,
-      builder.payload!,
-    );
-    print('Published: $message');
-  }
+    builder.addString('ALARM');
 
-  void disconnect() {
+    client.publishMessage(topic, MqttQos.atLeastOnce, builder.payload!);
+
+    print('📤 BUZZER_ON sent');
+
+    await Future.delayed(const Duration(milliseconds: 300));
     client.disconnect();
   }
 }
